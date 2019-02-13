@@ -54,5 +54,10 @@ namespace Mqtt.Domain
 
             await _mqttClient.SubscribeAsync(topic, MqttQualityOfService.AtMostOnce);
         }
+
+        public async Task PublishAsync(MqttApplicationMessage message, MqttQualityOfService qos)
+        {
+            await _mqttClient.PublishAsync(message, qos);
+        }
     }
 }

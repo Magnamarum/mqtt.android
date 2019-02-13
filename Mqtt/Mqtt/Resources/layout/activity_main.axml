@@ -5,6 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <Button
+        android:text="Send Message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonGoToSendMessage" />
+    <Button
+        android:layout_below="@id/buttonGoToSendMessage"
         android:text="Manage Brokers"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

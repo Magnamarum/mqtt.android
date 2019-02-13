@@ -46,5 +46,25 @@ namespace Mqtt.Services
             var client = Clients.First(c => c.Id == id);
             await client.Subscribe(topic);
         }
+
+        public async Task Publish(string clientId, int qos, string topic, string message)
+        {
+            var msg = new MqttApplicationMessage(topic, Encoding.UTF8.GetBytes(message));
+
+            var client = Clients.First(c => c.Id == clientId);
+            MqttQualityOfService mqttQoS = MqttQualityOfService.AtMostOnce;//QoS0
+            switch (qos)
+            {
+                case 1:
+                    mqttQoS = MqttQualityOfService.AtMostOnce;//QoS1
+                    break;
+                case 2:
+                    mqttQoS = MqttQualityOfService.ExactlyOnce;//QoS2
+                    break;
+
+            }
+            await client.PublishAsync(msg, mqttQoS); 
+
+        }
     }
 }

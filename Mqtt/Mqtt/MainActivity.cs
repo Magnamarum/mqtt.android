@@ -31,6 +31,12 @@ namespace Mqtt
         private Button _buttonAddBroker;
         private Button _buttonSubscribe;
         private EditText _editTextTopic;
+        private Button _buttonGoToSendMessage;
+        private Spinner _qosSpinner;
+        private Spinner _brokerSpinner;
+        private EditText _editTextSendTopic;
+        private EditText _editTextMessage;
+        private Button _buttonSendMessage;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -54,7 +60,61 @@ namespace Mqtt
             _messageList.Adapter = _messageListAdapter;
             _buttonManage = FindViewById<Button>(Resource.Id.buttonManageBrokers);
             _buttonManage.Click += ButtonManage_Click;
+            _buttonGoToSendMessage = FindViewById<Button>(Resource.Id.buttonGoToSendMessage);
+            _buttonGoToSendMessage.Click += _buttonGoToSendMessage_Click;
         }
+
+        private void _buttonGoToSendMessage_Click(object sender, EventArgs e)
+        {
+            SetUpSendMessage();
+        }
+
+        private void SetUpSendMessage()
+        {
+            _currentView = Resource.Layout.send_message;
+            SetContentView(_currentView);
+
+            _qosSpinner = FindViewById<Spinner>(Resource.Id.spinnerQoS);
+
+            var qosAdapter = ArrayAdapter.CreateFromResource(
+                    this, Resource.Array.QoS_list, Android.Resource.Layout.SimpleSpinnerItem);
+
+            qosAdapter.SetDropDownViewResource(Android.Resource.Layout.SimpleSpinnerDropDownItem);
+            _qosSpinner.Adapter = qosAdapter;
+
+
+            _brokerSpinner = FindViewById<Spinner>(Resource.Id.spinnerBrokers);
+            var brokerSpinnerAdapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleSpinnerItem, _mqttService.Clients.Select(x => x.Id).ToList());
+
+            brokerSpinnerAdapter.SetDropDownViewResource(Android.Resource.Layout.SimpleSpinnerDropDownItem);
+            _brokerSpinner.Adapter = brokerSpinnerAdapter;
+
+            _editTextSendTopic = FindViewById<EditText>(Resource.Id.editTextSendTopic);
+
+            _editTextMessage = FindViewById<EditText>(Resource.Id.editTextMessage);
+
+            _buttonSendMessage = FindViewById<Button>(Resource.Id.buttonSendMessage);
+            _buttonSendMessage.Click += _buttonSendMessage_Click;
+
+        }
+
+        private void _buttonSendMessage_Click(object sender, EventArgs e)
+        {
+            var qos = int.Parse(_qosSpinner.SelectedItem.ToString());
+            var clientId = _brokerSpinner.SelectedItem.ToString();
+            var topic = _editTextSendTopic.Text;
+            var message = _editTextMessage.Text;
+            Publish(clientId, qos, topic, message);
+        }
+
+        private async Task Publish(string clientId, int qos, string topic, string message)
+        {
+
+            await _mqttService.Publish(clientId, qos, topic, message);
+
+            SetUpMain();
+        }
+
         public override void OnBackPressed()
         {
             switch (_currentView)
@@ -63,6 +123,7 @@ namespace Mqtt
                     Finish();
                     break;
                 case Resource.Layout.manage_brokers:
+                case Resource.Layout.send_message:
                     SetUpMain();
                     break;
                 case Resource.Layout.edit_broker:
@@ -112,6 +173,9 @@ namespace Mqtt
         private async Task Subscribe(string topic)
         {
             await _currentClient.Subscribe(topic);
+
+            Toast.MakeText(this, "Subscribed to "+topic, ToastLength.Short);
+            SetUpManageBrokers();
 
         }
         private void ButtonAddBroker_Click(object sender, EventArgs e)
