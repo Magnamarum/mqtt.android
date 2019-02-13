@@ -10,33 +10,41 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using Mqtt.Domain;
 
 namespace Mqtt.Services
 {
     public class MqttService
     {
         private IMqttClient _mqttClient;
-        public event Action<MqttApplicationMessage> MessageReceived;
-
+        public event Action< MqttApplicationMessage> MessageReceived;
+        public IList<MyMqttClient> Clients { get; set; }  = new List<MyMqttClient>();
         private void OnMessageReceived(MqttApplicationMessage msg)
         {
             MessageReceived?.Invoke(msg);
         }
         public MqttService()
         {
-            Setup();
+
         }
 
-        public async Task Setup()
+        public async Task<MyMqttClient> AddBroker(string address, int port)
         {
-            _mqttClient = await MqttClient.CreateAsync("iot.eclipse.org", 1883);
+            var client = Clients.FirstOrDefault(c => c.Id == address+":" + port);
+            if(client==null)
+            {
 
-            await _mqttClient.ConnectAsync();
-            await _mqttClient.SubscribeAsync("#", MqttQualityOfService.AtMostOnce);
-            
-            _mqttClient
-                .MessageStream
-                .Subscribe(OnMessageReceived);
+                client = new MyMqttClient(address, port);
+                Clients.Add(client);
+                client.MessageReceived += MessageReceived;
+            }
+            return client;
+        }
+
+        public async Task Subscribe(string id, string topic)
+        {
+            var client = Clients.First(c => c.Id == id);
+            await client.Subscribe(topic);
         }
     }
 }

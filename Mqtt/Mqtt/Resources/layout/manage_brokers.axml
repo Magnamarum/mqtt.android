@@ -5,15 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <Button
-        android:text="Manage Brokers"
+        android:text="Add New Broker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/buttonManageBrokers" />
+        android:id="@+id/buttonEditBroker" />
     <ListView
-        android:layout_below="@id/buttonManageBrokers"
+        android:layout_below="@id/buttonEditBroker"
         android:minWidth="25px"
         android:minHeight="25px"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/listView" />
+        android:id="@+id/listViewBrokers" />
 </RelativeLayout>
