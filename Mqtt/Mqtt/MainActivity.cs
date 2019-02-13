@@ -44,7 +44,6 @@ namespace Mqtt
             _mqttService = new MqttService();
 
             SetUpMain();
-            //Setup();
         }
 
         private void SetUpMain()
@@ -206,12 +205,6 @@ namespace Mqtt
             SetUpManageBrokers();
         }
 
-        private async Task Setup()
-        {
-            var client = await _mqttService.AddBroker("iot.eclipse.org", 1883);
-            await client.Connect();
-            await client.Subscribe("#");
-        }
 
         private void MqttServiceOnMessageReceived(MqttApplicationMessage mqttApplicationMessage)
         {
